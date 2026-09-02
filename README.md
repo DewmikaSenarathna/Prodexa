@@ -45,8 +45,8 @@ demo (higher clutter levels involve heavy occlusion, which conflicts with the as
 
 | Member   | Modules Owned                                      |
 |----------|-----------------------------------------------------|
-| De Costa M.S.M. | Image Acquisition & Preprocessing, Object Detection & Segmentation |
-| Senarathna S.A.D.H. | Product Classification, Statistical Analysis & Report Generation   |
+| De Costa M.S.M.     | Image Acquisition & Preprocessing, Product Classification |
+| Senarathna S.A.D.H. | Object detection and segmentation,Report Generation       |
 
 ## Pipeline
 
@@ -54,13 +54,6 @@ demo (higher clutter levels involve heavy occlusion, which conflicts with the as
 Raw Image → Preprocessing → Segmentation → Classification → Statistics & Report → Annotated Output
 ```
 
-| Stage | Notebook | Source Module | Owner |
-|-------|----------|----------------|-------|
-| Preprocessing | `notebooks/01_preprocessing.ipynb` | `src/preprocessing.py` | Member A |
-| Segmentation | `notebooks/02_segmentation.ipynb` | `src/segmentation.py` | Member A |
-| Classification | `notebooks/03_classification.ipynb` | `src/classification.py` | Member B |
-| Statistics & Report | `notebooks/04_statistics_report.ipynb` | `src/report.py` | Member B |
-| Full Pipeline | `notebooks/00_pipeline_integration.ipynb` | — | Both |
 
 ## Project Structure
 
@@ -85,20 +78,7 @@ prodexa/
 > `dataset_subset.txt` (a manifest, not the images themselves) is version-controlled, so
 > teammates/graders can reproduce the exact subset used without a 20GB repo.
 
-## Categories
 
-Using the RPC dataset's **17 meta-categories** as classification targets:
-
-| Meta-category | Example SKUs |
-|---|---|
-| Bottle-like | drinks, sauces |
-| Box-like | tissue boxes, snack boxes |
-| Canister-like | canned goods |
-| Bag-like | chips, snacks |
-| _...(fill in remaining categories used, based on final subset selected)_ | |
-
-> Final subset of categories actually used should be confirmed once the working dataset
-> sample is finalized, and listed here with the reasoning for inclusion/exclusion.
 
 ## Techniques Used
 
