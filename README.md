@@ -83,10 +83,10 @@ prodexa/
 ## Techniques Used
 
 **Preprocessing**
-- Resizing, Gaussian/median blur, color space conversion, lighting normalization (CLAHE)
+- Resizing, Gaussian/median blur, color space conversion, lighting normalization 
 
 **Segmentation**
-- Thresholding (Otsu / adaptive), HSV-based background masking, morphological operations,
+- Thresholding , HSV-based background masking, morphological operations,
   contour detection
 
 **Classification**
@@ -137,11 +137,7 @@ The dataset is **not included in this repository** (too large for GitHub). To se
 
 ## Contribution Workflow
 
-- `main` — stable, working code only
-- `feature/preprocessing`, `feature/segmentation` — Member A
-- `feature/classification`, `feature/statistics-report` — Member B
-- Each feature developed on its own branch and merged via Pull Request
-- Commit history reflects individual contribution for demo/viva verification
+
 
 ## Limitations
 
