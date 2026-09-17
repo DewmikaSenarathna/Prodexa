@@ -85,19 +85,7 @@ def batch_preprocess(filenames, source_dir, output_dir, target_width=DEFAULT_TAR
 
 
 def load_image_category_map(annotations_path):
-    """
-    Build a mapping of image_id -> category info, and category_id -> category name/supercategory,
-    from a COCO-format annotations JSON file.
-
-    Args:
-        annotations_path: path to instances_*.json
-
-    Returns:
-        Tuple of:
-            image_to_category: dict mapping image_id -> category_id
-            image_id_to_filename: dict mapping image_id -> filename
-            category_info: dict mapping category_id -> {'name': ..., 'supercategory': ...}
-    """
+    
     with open(annotations_path, "r") as f:
         coco_data = json.load(f)
 
@@ -110,7 +98,7 @@ def load_image_category_map(annotations_path):
         img["id"]: img["file_name"] for img in coco_data["images"]
     }
 
-    # train2019 has 1 annotation per image, so this is a simple 1:1 map
+    
     image_to_category = {
         ann["image_id"]: ann["category_id"] for ann in coco_data["annotations"]
     }
@@ -119,18 +107,7 @@ def load_image_category_map(annotations_path):
 
 
 def stratified_sample(annotations_path, images_per_category=80, seed=42):
-    """
-    Sample a balanced number of images per meta-category (supercategory) from
-    a COCO-format annotations file.
-
-    Args:
-        annotations_path: path to instances_*.json
-        images_per_category: number of images to sample per supercategory
-        seed: random seed for reproducibility
-
-    Returns:
-        List of dicts: [{'filename': ..., 'supercategory': ..., 'category_name': ...}, ...]
-    """
+    
     random.seed(seed)
     image_to_category, image_id_to_filename, category_info = load_image_category_map(annotations_path)
 
