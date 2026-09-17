@@ -6,3 +6,4 @@ scikit-image
 pandas
 jupyter
 ipykernel
+tensorflow
