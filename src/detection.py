@@ -1,27 +1,12 @@
-"""
-detection.py
-
-Object detection / product isolation for the PRODEXA pipeline.
-
-Takes the binary mask (and, optionally, the watershed instance-label map)
-produced by src/segmentation.py and turns it into a list of individual
-product detections: bounding boxes, per-instance masks, and cropped image
-patches ready to be handed to the classification module.
-
-This module also provides the "display output" required by the
-assignment: bounding boxes with labels drawn on the image, plus a plain
-console summary.
-"""
-
 import os
 import cv2
 import numpy as np
 
 
-DEFAULT_MIN_AREA_RATIO = 0.0015   # ignore contours smaller than 0.15% of the image
-DEFAULT_MAX_AREA_RATIO = 0.60     # ignore a contour that swallows most of the frame
-DEFAULT_MIN_ASPECT = 0.15         # w/h or h/w below this is treated as a sliver / noise
-DEFAULT_PADDING = 6               # pixels of padding added around each crop
+DEFAULT_MIN_AREA_RATIO = 0.0015   
+DEFAULT_MAX_AREA_RATIO = 0.60     
+DEFAULT_MIN_ASPECT = 0.15         
+DEFAULT_PADDING = 6               
 
 
 def _contours_from_mask(mask):
@@ -30,15 +15,13 @@ def _contours_from_mask(mask):
 
 
 def _contours_from_labels(labels):
-    """Build one contour per watershed instance label (labels >= 2)."""
     contours = []
     for label in np.unique(labels):
-        if label <= 1:  # 1 = background, -1 = watershed boundary, 0 = unknown
+        if label <= 1:  
             continue
         instance_mask = np.uint8(labels == label) * 255
         instance_contours = _contours_from_mask(instance_mask)
         if instance_contours:
-            # a clean instance should yield a single contour; keep the largest
             contours.append(max(instance_contours, key=cv2.contourArea))
     return contours
 
@@ -60,7 +43,6 @@ def filter_contours(contours, image_shape,
                      min_area_ratio=DEFAULT_MIN_AREA_RATIO,
                      max_area_ratio=DEFAULT_MAX_AREA_RATIO,
                      min_aspect=DEFAULT_MIN_ASPECT):
-    """Keep only contours whose area/aspect ratio look like a real product."""
     image_area = image_shape[0] * image_shape[1]
     return [
         c for c in contours
@@ -72,22 +54,7 @@ def detect_products(image, segmentation_result,
                      min_area_ratio=DEFAULT_MIN_AREA_RATIO,
                      max_area_ratio=DEFAULT_MAX_AREA_RATIO,
                      min_aspect=DEFAULT_MIN_ASPECT):
-    """
-    Turn a segmentation result into a list of product detections.
-
-    Args:
-        image: preprocessed BGR image the mask/labels were computed from.
-        segmentation_result: dict returned by segmentation.segment_products
-            (must contain "mask", may contain "labels").
-        min_area_ratio / max_area_ratio / min_aspect: see filter_contours.
-
-    Returns:
-        List of detection dicts, sorted left-to-right, each with:
-            "id":     1-based index
-            "bbox":   (x, y, w, h)
-            "area":   contour area in pixels
-            "contour": the raw contour (for drawing/debugging)
-    """
+    
     labels = segmentation_result.get("labels")
     if labels is not None:
         contours = _contours_from_labels(labels)
@@ -106,7 +73,6 @@ def detect_products(image, segmentation_result,
             "contour": contour,
         })
 
-    # left-to-right, top-to-bottom reading order makes console output stable/reproducible
     detections.sort(key=lambda d: (d["bbox"][0], d["bbox"][1]))
     for idx, det in enumerate(detections, start=1):
         det["id"] = idx
@@ -115,13 +81,7 @@ def detect_products(image, segmentation_result,
 
 
 def crop_products(image, detections, padding=DEFAULT_PADDING):
-    """
-    Crop each detection out of `image` with a small padding margin,
-    clipped to the image boundary.
-
-    Returns a list of (detection_id, cropped_image) tuples, in the same
-    order as `detections`.
-    """
+    
     h_img, w_img = image.shape[:2]
     crops = []
     for det in detections:
@@ -135,14 +95,7 @@ def crop_products(image, detections, padding=DEFAULT_PADDING):
 
 
 def draw_detections(image, detections, labels=None, color=(0, 220, 0), thickness=2):
-    """
-    Draw bounding boxes + a label per detection on a copy of `image`.
 
-    Args:
-        labels: optional dict/list mapping detection "id" -> text label
-            (e.g. a category name from the classification module). If not
-            given, detections are labelled "#<id>".
-    """
     annotated = image.copy()
     for det in detections:
         x, y, w, h = det["bbox"]
@@ -155,20 +108,14 @@ def draw_detections(image, detections, labels=None, color=(0, 220, 0), thickness
 
         text_origin = (x, max(y - 8, 12))
         cv2.putText(annotated, text, text_origin, cv2.FONT_HERSHEY_SIMPLEX,
-                    0.55, (0, 0, 0), 3, cv2.LINE_AA)   # outline for readability
+                    0.55, (0, 0, 0), 3, cv2.LINE_AA)   
         cv2.putText(annotated, text, text_origin, cv2.FONT_HERSHEY_SIMPLEX,
                     0.55, (255, 255, 255), 1, cv2.LINE_AA)
     return annotated
 
 
 def save_detection_outputs(image, detections, output_dir, base_name):
-    """
-    Save the annotated (bounding-box) image and every individual product
-    crop to disk, mirroring the project's outputs/ folder convention.
-
-    Returns:
-        dict with "annotated_path" and "crop_paths" (list, in detection order).
-    """
+    
     annotated_dir = os.path.join(output_dir, "annotated_images")
     crops_dir = os.path.join(output_dir, "crops", base_name)
     os.makedirs(annotated_dir, exist_ok=True)
@@ -188,7 +135,6 @@ def save_detection_outputs(image, detections, output_dir, base_name):
 
 
 def print_detection_summary(detections, image_name=""):
-    """Simple console-based summary, as allowed by the assignment brief."""
     title = f"Detected products in {image_name}" if image_name else "Detected products"
     print(title)
     print("-" * len(title))
@@ -200,10 +146,7 @@ def print_detection_summary(detections, image_name=""):
 
 def detect_and_report(image, segmentation_result, output_dir=None, base_name="image",
                        **filter_kwargs):
-    """
-    Convenience wrapper: detect -> (optionally) save annotated image and
-    crops -> print console summary. Returns the list of detections.
-    """
+    
     detections = detect_products(image, segmentation_result, **filter_kwargs)
     print_detection_summary(detections, image_name=base_name)
 

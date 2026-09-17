@@ -1,8 +1,3 @@
-"""
-Unit tests for src/detection.py
-Run with: pytest tests/test_detection.py
-"""
-
 import sys
 import os
 import numpy as np
@@ -40,7 +35,7 @@ def test_detections_are_left_to_right(synthetic_tray_image):
 
 
 def test_filter_contours_rejects_tiny_noise():
-    contour = np.array([[[0, 0]], [[2, 0]], [[2, 2]], [[0, 2]]])  # 2x2 speckle
+    contour = np.array([[[0, 0]], [[2, 0]], [[2, 2]], [[0, 2]]])  
     kept = filter_contours([contour], image_shape=(300, 400), min_area_ratio=0.01)
     assert kept == []
 

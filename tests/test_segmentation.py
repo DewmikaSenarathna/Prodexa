@@ -1,8 +1,3 @@
-"""
-Unit tests for src/segmentation.py
-Run with: pytest tests/test_segmentation.py
-"""
-
 import sys
 import os
 import numpy as np
@@ -18,13 +13,10 @@ from src.segmentation import (
 
 @pytest.fixture
 def synthetic_tray_image():
-    """
-    A plain gray "tray" background with two colourful rectangular
-    "products" drawn on it, far enough apart not to touch.
-    """
-    image = np.full((300, 400, 3), 200, dtype=np.uint8)  # light gray background
-    cv2.rectangle(image, (40, 40), (140, 140), (0, 0, 255), thickness=-1)     # red block
-    cv2.rectangle(image, (220, 150), (340, 260), (255, 120, 0), thickness=-1)  # blue block
+    
+    image = np.full((300, 400, 3), 200, dtype=np.uint8)  
+    cv2.rectangle(image, (40, 40), (140, 140), (0, 0, 255), thickness=-1)     
+    cv2.rectangle(image, (220, 150), (340, 260), (255, 120, 0), thickness=-1) 
     return image
 
 
@@ -36,7 +28,6 @@ def test_compute_intensity_mask_shape(synthetic_tray_image):
 
 def test_compute_saturation_mask_flags_colourful_regions(synthetic_tray_image):
     mask = compute_saturation_mask(synthetic_tray_image)
-    # the red block's center should be marked foreground
     assert mask[90, 90] == 255
 
 
@@ -57,8 +48,8 @@ def test_clean_mask_shape_unchanged(synthetic_tray_image):
 
 def test_remove_small_components_drops_noise():
     mask = np.zeros((100, 100), dtype=np.uint8)
-    mask[10:12, 10:12] = 255      # 4px speckle, should be dropped
-    mask[50:80, 50:80] = 255      # 900px block, should survive
+    mask[10:12, 10:12] = 255      
+    mask[50:80, 50:80] = 255     
     cleaned = remove_small_components(mask, min_area=50)
     assert cleaned[11, 11] == 0
     assert cleaned[65, 65] == 255
@@ -67,8 +58,6 @@ def test_remove_small_components_drops_noise():
 def test_segment_products_detects_two_blobs(synthetic_tray_image):
     result = segment_products(synthetic_tray_image, min_component_area=200)
     assert "mask" in result and "labels" in result
-    # both product centers should be foreground in the final mask
     assert result["mask"][90, 90] == 255
     assert result["mask"][200, 280] == 255
-    # the tray background should be background
     assert result["mask"][10, 10] == 0
